@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Predict Next Words</title>
+</head>
+<body>
+    <h2>Enter Text</h2>
+    <textarea id="inputText" rows="4" cols="50"></textarea><br>
+    <button onclick="predictWords()">Predict Next Words</button>
+    <h2>Predictions:</h2>
+    <div id="predictions"></div>
+
+    <script>
+        async function predictWords() {
+            const text = document.getElementById('inputText').value;
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: text, num_predictions: 5 }),
+            });
+            const predictions = await response.json();
+            document.getElementById('predictions').innerText = predictions.join(", ");
+        }
+    </script>
+</body>
+</html>
