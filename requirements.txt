@@ -1,0 +1,10 @@
+--index-url https://download.pytorch.org/whl/cpu
+flask
+numpy
+joblib
+scikit-learn
+gunicorn
+pandas
+chardet
+transformers 
+torch torchvision torchaudio
