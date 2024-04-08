@@ -3,17 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <title>Predict Next Words</title>
-    <!-- Optional: Include a CSS framework or custom styles -->
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #eeeeee;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+        .card {
+            background-color: white;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            float: right;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            button {
+                width: 100%;
+                margin-top: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h2>Enter Text to Predict Next Words</h2>
-    <textarea id="inputText" rows="4" cols="50"></textarea><br>
-    <button onclick="predictWords()">Predict Next Words</button>
-    <h2>Predictions:</h2>
-    <div id="predictions"></div>
+    <div class="container">
+        <div class="card">
+            <h2>Enter Text to Predict Next Words</h2>
+            <div class="form-group">
+                <textarea id="inputText" rows="4"></textarea>
+            </div>
+            <button onclick="predictWords()">Predict Next Words</button>
+        </div>
+        <div class="card" id="predictionsCard" style="display: none;">
+            <h2>Predictions:</h2>
+            <div id="predictions"></div>
+        </div>
+    </div>
 
     <script>
         async function predictWords() {
+            document.getElementById('predictionsCard').style.display = 'none';
             const text = document.getElementById('inputText').value;
             try {
                 const response = await fetch('/api/v1/predict', {
@@ -28,9 +90,11 @@
                 }
                 const data = await response.json();
                 document.getElementById('predictions').innerText = data.predictions.join(", ");
+                document.getElementById('predictionsCard').style.display = 'block';
             } catch (error) {
                 console.error('There has been a problem with your fetch operation:', error);
                 document.getElementById('predictions').innerText = 'Error: Could not fetch predictions.';
+                document.getElementById('predictionsCard').style.display = 'block';
             }
         }
     </script>
