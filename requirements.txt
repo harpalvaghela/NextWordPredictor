@@ -7,4 +7,6 @@ gunicorn
 pandas
 chardet
 transformers 
-torch torchvision torchaudio
+torch 
+torchvision 
+torchaudio
