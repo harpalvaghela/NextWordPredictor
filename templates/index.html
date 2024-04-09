@@ -133,6 +133,52 @@
             justify-content: center;
 
         }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #f0f0f0; 
+
+            display:flex;
+            padding:5px;
+            align-items: center;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            opacity: 1;
+            transition: opacity 1s ease-in-out;
+            font-size: larger;
+            font-weight: 600;
+        }
+
+        /* Progress bar fill */
+        .progress-bar {
+            height: 100%;
+            background-color: #6c63ffba; 
+        }
+        .sr-only{
+            display:flex
+        }
+
+        .progress{
+            display:flex;
+            padding:5px;
+            align-items: center;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            opacity: 1;
+            transition: opacity 1s ease-in-out;
+            font-size: larger;
+            font-weight: 600;
+            margin-bottom:5px
+        }
+        .confidence{
+            margin-left:2px;
+            color:#000
+        }
     </style>
 </head>
 <body>
@@ -176,7 +222,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ text: text, num_predictions: 5 }),
+                body: JSON.stringify({ text: String(text).trim(), num_predictions: 5 }),
             });
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -185,16 +231,43 @@
             document.getElementById('predictionsCard').style.display = 'block';
             
             // Assuming the backend returns an array of objects with word and confidence
+       
+
             data.predictions.forEach((prediction, index) => {
                 setTimeout(() => {
+                    // Create the outer div for the progress bar
+                    const progressDiv = document.createElement('div');
+                    progressDiv.classList.add('progress');
+
+                    // Create the inner div for the progress bar
+                    const progressBar = document.createElement('div');
+                    progressBar.classList.add('progress-bar');
+                    progressBar.setAttribute('role', 'progressbar');
+                    progressBar.setAttribute('aria-valuenow', '70');
+                    progressBar.setAttribute('aria-valuemin', '0');
+                    progressBar.setAttribute('aria-valuemax', '100');
+                    progressBar.style.width = `${prediction.confidence * 100}%`;
+
+                    // Create the span for screen readers
+                    const span = document.createElement('span');
+                    span.classList.add('sr-only');
+                    span.innerHTML = `${prediction.word} <span class="confidence">(${(prediction.confidence * 100).toFixed(2)}%)</span>`;;
+
+                    // Append the span to the progress bar
+                    progressBar.appendChild(span);
+
+                    // Append the progress bar to the outer div
+                    progressDiv.appendChild(progressBar);
+
                     const wordElement = document.createElement('div');
                     wordElement.classList.add('prediction');
                     wordElement.innerHTML = `${prediction.word} <span class="confidence">(${(prediction.confidence * 100).toFixed(2)}%)</span>`;
-                    predictionsElement.appendChild(wordElement);
+                    predictionsElement.appendChild(progressDiv);
                     // Animate the opacity from 0 to 1
                     requestAnimationFrame(() => {
                         wordElement.style.opacity = 1;
                     });
+            
                 }, index * 500); // Increase delay for each word
             });
             
@@ -222,7 +295,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ text: text }),
+                body: JSON.stringify({ text: String(text).trim() }),
             });
             if (!response.ok) {
                 throw new Error('Network response was not ok');
