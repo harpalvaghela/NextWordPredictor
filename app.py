@@ -8,8 +8,6 @@ import torch.nn.functional as F
 app = Flask(__name__)
 CORS(app)  # Enable CORS
 
-app = Flask(__name__)
-
 # Load pre-trained model and tokenizer
 tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 model = GPT2LMHeadModel.from_pretrained("gpt2")
