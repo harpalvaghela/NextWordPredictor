@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Predict Next Words</title>
     <style>
+        /* Previous CSS for layout and styling */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
@@ -26,7 +27,7 @@
         .form-group {
             margin-bottom: 20px;
         }
-        textarea {
+        textarea, .prediction {
             width: 100%;
             padding: 10px;
             margin-top: 8px;
@@ -46,6 +47,17 @@
         }
         button:hover {
             background-color: #0056b3;
+        }
+        .prediction {
+            display: inline-block;
+            margin: 5px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            opacity: 0; /* Start invisible */
+            transition: opacity 1s ease-in-out;
         }
         @media (max-width: 600px) {
             .container {
@@ -75,7 +87,10 @@
 
     <script>
         async function predictWords() {
+            const predictionsElement = document.getElementById('predictions');
+            predictionsElement.innerHTML = ''; // Clear previous predictions
             document.getElementById('predictionsCard').style.display = 'none';
+            
             const text = document.getElementById('inputText').value;
             try {
                 const response = await fetch('/api/v1/predict', {
@@ -89,11 +104,27 @@
                     throw new Error('Network response was not ok');
                 }
                 const data = await response.json();
-                document.getElementById('predictions').innerText = data.predictions.join(", ");
                 document.getElementById('predictionsCard').style.display = 'block';
+                
+                // Display each prediction with a delay
+                data.predictions.forEach((word, index) => {
+                    setTimeout(() => {
+                        const wordElement = document.createElement('span');
+                        wordElement.classList.add('prediction');
+                        wordElement.textContent = word;
+                        predictionsElement.appendChild(wordElement);
+                        // Animate the opacity from 0 to 1
+                        requestAnimationFrame(() => {
+                            wordElement.style.opacity = 1;
+                        });
+                    }, index * 500); // Increase delay for each word
+                });
+                
             } catch (error) {
                 console.error('There has been a problem with your fetch operation:', error);
-                document.getElementById('predictions').innerText = 'Error: Could not fetch predictions.';
+                const errorMessage = document.createElement('span');
+                errorMessage.textContent = 'Error: Could not fetch predictions.';
+                predictionsElement.appendChild(errorMessage);
                 document.getElementById('predictionsCard').style.display = 'block';
             }
         }
