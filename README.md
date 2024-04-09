@@ -1,23 +1,41 @@
-# NextWordPredictor
+# Next Word Prediction
 
-The Jupyter notebook "Next_word_prediction_using_LSTM" focuses on predicting the next word using an LSTM (Long Short-Term Memory) model. Below is a summary of its key components:
+This Flask web application utilizes the GPT-2 language model to generate text predictions and sentences based on user input. The app provides an easy-to-use interface for interacting with the GPT-2 model via HTTP requests.
 
-## Libraries Used
-- **NumPy** for numerical operations.
-- **Pandas** for data manipulation.
-- **NLTK** (Natural Language Toolkit) for text preprocessing, specifically tokenization.
-- **TensorFlow Keras** for building and training the LSTM model.
-## Data Preprocessing
-- Tokenization of the input text using **RegexpTokenizer** from NLTK to split the text into tokens.
-- The input data is a collection of text data from a CSV file **(fake_or_real_news.csv)**, which is read and then combined into a single string for processing.
-## Parameters
-- **n_words**: The number of words to consider as input for the model.
-- Various parameters for data processing like **unique_tokens**, **unique_token_index**, and structures for storing input and output sequences for the model.
-## Model Architecture
-- The model is a Sequential model consisting of two LSTM layers followed by a Dense layer with a softmax activation function. The first LSTM layer has 128 units and returns sequences, while the second LSTM layer also has 128 units but does not return sequences. This is designed to predict the probability distribution over the unique tokens for the next word.
-- The model is compiled with the RMSprop optimizer and categorical crossentropy as the loss function. It is trained on the input and output sequences with a batch size of 128 for 50 epochs.
-## Main Functions
-- **predict_next_word(input_text, n_best)**: Predicts the next word given an input text sequence, returning the **n_best** possible next words.
-- **generate_text(input_text, text_length, creativity=3)**: Generates text of a specified length starting from an input text, using the model's predictions. The **creativity** parameter influences the randomness of the next word selection.
+## Overview
 
-This notebook demonstrates how to preprocess text data for a sequence prediction task, construct an LSTM-based model for next word prediction, and apply the model to generate text sequences.
+The project consists of a Flask web application that serves as an interface to a GPT-2 language model. Users can input text prompts, and the model will generate predictions for the next words or complete sentences based on the provided input.
+
+## Features
+
+- **Predict Next Words**: Users can input a text prompt, and the app will generate predictions for the next words or tokens in the sequence.
+- **Predict Next Sentence**: Users can input a text prompt, and the app will generate a complete sentence based on the provided input.
+- **HTML Interface**: The web application provides a user-friendly HTML interface for interacting with the model.
+- **REST API**: The application exposes REST API endpoints for programmatic access to the model's predictions.
+
+## Getting Started
+
+To run the web application locally, follow these steps:
+
+1. Clone this repository to your local machine.
+2. Navigate to the project directory.
+3. Install the required dependencies using pip.
+4. Run the Flask app.
+5. Access the web application in your web browser at `http://localhost:5000`.
+
+## Usage
+
+### Predict Next Words
+
+To predict the next words or tokens given an input text, send a POST request to the `/api/v1/predict` endpoint with JSON data containing the input text. You can specify the number of predictions to generate (default is 3).
+
+### Predict Next Sentence
+
+To predict the next complete sentence given an input text, send a POST request to the `/api/v1/predict/sentence` endpoint with JSON data containing the input text.
+
+## Dependencies
+
+- Flask
+- Flask-CORS
+- transformers
+- torch
