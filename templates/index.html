@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Predict Next Words</title>
+    <style>
+        /* Previous CSS for layout and styling */
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #00100B;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+        .card {
+            background-color: #fff;
+            padding: 10px 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            height: max-content;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .confidence {
+            color: #888;
+            font-size: 0.8em;
+        }
+        textarea, .prediction {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        button {
+            background-color: #000;
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            float: right;
+        }
+        button:hover {
+            background-color: #6C63FF;
+        }
+        .prediction {
+            display: inline-block;
+            margin: 5px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            opacity: 0; /* Start invisible */
+            transition: opacity 1s ease-in-out;
+            font-size: larger;
+            font-weight: 600;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            button {
+                width: 100%;
+                margin-top: 10px;
+            }
+        }
+        h1{
+            text-transform: capitalize;
+            text-align: center;
+        } 
+        h2{
+            text-transform: capitalize;
+            text-align: center;
+        }
+
+        .btns{
+            margin: 5px 0px;
+            display:flex;
+            justify-content: space-evenly;
+        }
+        #predictedSentence{
+            display:flex;
+            padding:5px;
+            align-items: center;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            opacity: 1;
+            transition: opacity 1s ease-in-out;
+            font-size: larger;
+            font-weight: 600;
+        }
+        button{
+            font-weight: bold;
+        }
+        textarea{
+            font-family: sans-serif;
+            font-size: larger;
+            font-weight: 600;
+        }
+        svg{
+            height:45px;
+            weight:45px;
+            margin-left:4px;
+            fill: #6C63FF;
+        }
+        svg:nth-child(2){
+            height:45px;
+            weight:45px;
+            margin-left:4px;
+            fill: #6C63FF;
+            margin-top: 6px;
+        }
+
+        .head {
+            display: flex;
+            justify-content: center;
+        }
+        .foot{
+            display: flex;
+            justify-content: center;
+
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #f0f0f0; 
+
+            display:flex;
+            padding:5px;
+            align-items: center;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            opacity: 1;
+            transition: opacity 1s ease-in-out;
+            font-size: larger;
+            font-weight: 600;
+        }
+
+        /* Progress bar fill */
+        .progress-bar {
+            height: 100%;
+            background-color: #6c63ffba; 
+        }
+        .sr-only{
+            display:flex
+        }
+
+        .progress{
+            display:flex;
+            padding:5px;
+            align-items: center;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            opacity: 1;
+            transition: opacity 1s ease-in-out;
+            font-size: larger;
+            font-weight: 600;
+            margin-bottom:5px
+        }
+        .confidence{
+            margin-left:2px;
+            color:#000
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="head">
+            <h1>Next Word Prediction</h1>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M64 0C28.7 0 0 28.7 0 64V352c0 35.3 28.7 64 64 64h96v80c0 6.1 3.4 11.6 8.8 14.3s11.9 2.1 16.8-1.5L309.3 416H448c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64H64z"/></svg>
+            </div>
+            <div class="form-group">
+                <textarea id="inputText" placeholder="Enter Text to Predict Next Words" rows="4"></textarea>
+            </div>
+            <div class="btns">
+                <button onclick="predictWords()">Predict Next Words</button>
+                <button onclick="predictSentence()">Predict Next Sentence</button>
+            </div>
+        </div>
+        <div class="card" id="predictionsCard" style="display: none;">
+            <h2>Predictions:</h2>
+            <div id="predictions"></div>
+        </div>
+        <div class="card" id="sentencePredictionCard" style="display: none;">
+            <div class="foot">
+            <h2>Predicted Sentence</h2>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M320 0c17.7 0 32 14.3 32 32V96H472c39.8 0 72 32.2 72 72V440c0 39.8-32.2 72-72 72H168c-39.8 0-72-32.2-72-72V168c0-39.8 32.2-72 72-72H288V32c0-17.7 14.3-32 32-32zM208 384c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16H208zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16H304zm96 0c-8.8 0-16 7.2-16 16s7.2 16 16 16h32c8.8 0 16-7.2 16-16s-7.2-16-16-16H400zM264 256a40 40 0 1 0 -80 0 40 40 0 1 0 80 0zm152 40a40 40 0 1 0 0-80 40 40 0 1 0 0 80zM48 224H64V416H48c-26.5 0-48-21.5-48-48V272c0-26.5 21.5-48 48-48zm544 0c26.5 0 48 21.5 48 48v96c0 26.5-21.5 48-48 48H576V224h16z"/></svg>
+        </div>
+            <div id="predictedSentence"></div>
+        </div>
+    </div>
+
+<script>
+    async function predictWords() {
+        const predictionsElement = document.getElementById('predictions');
+        predictionsElement.innerHTML = ''; // Clear previous predictions
+        document.getElementById('predictionsCard').style.display = 'none';
+        
+        const text = document.getElementById('inputText').value;
+        try {
+            const response = await fetch('/api/v1/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: String(text).trim(), num_predictions: 5 }),
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            document.getElementById('predictionsCard').style.display = 'block';
+            
+            // Assuming the backend returns an array of objects with word and confidence
+       
+
+            data.predictions.forEach((prediction, index) => {
+                setTimeout(() => {
+                    // Create the outer div for the progress bar
+                    const progressDiv = document.createElement('div');
+                    progressDiv.classList.add('progress');
+
+                    // Create the inner div for the progress bar
+                    const progressBar = document.createElement('div');
+                    progressBar.classList.add('progress-bar');
+                    progressBar.setAttribute('role', 'progressbar');
+                    progressBar.setAttribute('aria-valuenow', '70');
+                    progressBar.setAttribute('aria-valuemin', '0');
+                    progressBar.setAttribute('aria-valuemax', '100');
+                    progressBar.style.width = `${prediction.confidence * 100}%`;
+
+                    // Create the span for screen readers
+                    const span = document.createElement('span');
+                    span.classList.add('sr-only');
+                    span.innerHTML = `${prediction.word} <span class="confidence">(${(prediction.confidence * 100).toFixed(2)}%)</span>`;;
+
+                    // Append the span to the progress bar
+                    progressBar.appendChild(span);
+
+                    // Append the progress bar to the outer div
+                    progressDiv.appendChild(progressBar);
+
+                    const wordElement = document.createElement('div');
+                    wordElement.classList.add('prediction');
+                    wordElement.innerHTML = `${prediction.word} <span class="confidence">(${(prediction.confidence * 100).toFixed(2)}%)</span>`;
+                    predictionsElement.appendChild(progressDiv);
+                    // Animate the opacity from 0 to 1
+                    requestAnimationFrame(() => {
+                        wordElement.style.opacity = 1;
+                    });
+            
+                }, index * 500); // Increase delay for each word
+            });
+            
+        } catch (error) {
+            console.error('There has been a problem with your fetch operation:', error);
+            const errorMessage = document.createElement('span');
+            errorMessage.textContent = 'Error: Could not fetch predictions.';
+            predictionsElement.appendChild(errorMessage);
+            document.getElementById('predictionsCard').style.display = 'block';
+        }
+    }
+
+    async function predictSentence() {
+        const textElement = document.getElementById('inputText');
+        const text = textElement.value;
+        const predictedSentenceElement = document.getElementById('predictedSentence');
+        const sentencePredictionCard = document.getElementById('sentencePredictionCard');
+
+        // Clear previous prediction
+        predictedSentenceElement.innerHTML = '';
+
+        try {
+            const response = await fetch('/api/v1/predict/sentence', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: String(text).trim() }),
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            predictedSentenceElement.innerText = data.predicted_sentence;
+            sentencePredictionCard.style.display = 'block';
+        } catch (error) {
+            console.error('There has been a problem with your fetch operation:', error);
+            predictedSentenceElement.innerText = 'Error: Could not fetch the predicted sentence.';
+            sentencePredictionCard.style.display = 'block';
+        }
+    }
+</script>
+</body>
+</html>

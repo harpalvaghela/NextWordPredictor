@@ -1,0 +1,12 @@
+flask
+numpy
+joblib
+scikit-learn
+gunicorn
+pandas
+chardet
+transformers
+torch 
+torchvision 
+torchaudio
+flask_cors
