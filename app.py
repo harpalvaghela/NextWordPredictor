@@ -3,6 +3,7 @@ from transformers import GPT2Tokenizer, GPT2LMHeadModel
 import torch
 from flask import render_template
 from flask_cors import CORS
+import torch.nn.functional as F
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS
@@ -13,11 +14,39 @@ app = Flask(__name__)
 tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 model = GPT2LMHeadModel.from_pretrained("gpt2")
 
+# def predict_next_words(text, num_predictions=3):
+#     num_beams = max(num_predictions, 3)
+    
+#     input_ids = tokenizer.encode(text, return_tensors="pt")
+#     with torch.no_grad():
+#         outputs = model.generate(
+#             input_ids,
+#             max_length=len(input_ids[0]) + 1,
+#             num_return_sequences=num_predictions,
+#             no_repeat_ngram_size=2,
+#             pad_token_id=tokenizer.eos_token_id,
+#             num_beams=num_beams,
+#             early_stopping=True
+#         )
+    
+#     predicted_words = []
+#     for output in outputs:
+#         predicted_token_id = output[-1]
+#         predicted_word = tokenizer.decode(predicted_token_id)
+#         predicted_words.append(predicted_word.strip())
+    
+#     return predicted_words
+
+
+
 def predict_next_words(text, num_predictions=3):
     num_beams = max(num_predictions, 3)
     
     input_ids = tokenizer.encode(text, return_tensors="pt")
+    # Note: Consider moving model to eval mode with model.eval()
+    
     with torch.no_grad():
+        # Generate sequences and also return the logits by setting return_dict_in_generate=True
         outputs = model.generate(
             input_ids,
             max_length=len(input_ids[0]) + 1,
@@ -25,16 +54,27 @@ def predict_next_words(text, num_predictions=3):
             no_repeat_ngram_size=2,
             pad_token_id=tokenizer.eos_token_id,
             num_beams=num_beams,
-            early_stopping=True
+            early_stopping=True,
+            return_dict_in_generate=True,
+            output_scores=True
         )
-    
-    predicted_words = []
-    for output in outputs:
-        predicted_token_id = output[-1]
+
+    logits = outputs.scores[-1]  # Get logits of the last token for each sequence
+    softmax_probs = F.softmax(logits, dim=-1)  # Compute softmax to get probabilities
+
+    predicted_words_with_confidence = []
+    for i, output in enumerate(outputs.sequences):
+        predicted_token_id = output[-1].item()  # Get the last token id
         predicted_word = tokenizer.decode(predicted_token_id)
-        predicted_words.append(predicted_word.strip())
+        confidence_score = softmax_probs[i, predicted_token_id].item()  # Confidence score
+        
+        predicted_words_with_confidence.append({
+            "word": predicted_word.strip(),
+            "confidence": confidence_score
+        })
     
-    return predicted_words
+    return predicted_words_with_confidence
+
 
 @app.route('/')
 def home():
