@@ -76,6 +76,52 @@ def predict_next_words(text, num_predictions=3):
     return predicted_words_with_confidence
 
 
+# def predict_next_sentence(text, max_length=50):
+#     input_ids = tokenizer.encode(text, return_tensors="pt")
+    
+#     with torch.no_grad():
+#         # Generate a sequence that continues the input text
+#         outputs = model.generate(
+#             input_ids,
+#             max_length=len(input_ids[0]) + max_length,
+#             num_return_sequences=1,
+#             pad_token_id=tokenizer.eos_token_id,
+#             eos_token_id=tokenizer.eos_token_id,
+#             temperature=0.7  # Adjust for creativity; lower = more deterministic
+#         )
+
+#     # Decode the generated sequence to a string
+#     generated_sequence = outputs[0]
+#     predicted_sentence = tokenizer.decode(generated_sequence, skip_special_tokens=True)
+
+#     return predicted_sentence
+
+
+def predict_next_sentence(text, max_length=50):
+    input_ids = tokenizer.encode(text, return_tensors="pt")
+    
+    with torch.no_grad():
+        outputs = model.generate(
+            input_ids,
+            max_length=len(input_ids[0]) + max_length,
+            num_return_sequences=1,
+            pad_token_id=tokenizer.eos_token_id,
+            eos_token_id=tokenizer.eos_token_id,
+            temperature=0.7
+        )
+
+    generated_sequence = outputs[0]
+    predicted_sentence = tokenizer.decode(generated_sequence, skip_special_tokens=True)
+    
+    # New logic to end the sentence after it's "finished"
+    end_punctuation = {'.', '!', '?'}
+    for i, char in enumerate(predicted_sentence[len(text):], start=len(text)):
+        if char in end_punctuation:
+            # Stop at the first sentence-ending punctuation after the input text
+            return predicted_sentence[:i+1]
+    
+    return predicted_sentence
+
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -102,6 +148,22 @@ def predict():
     num_predictions = data.get('num_predictions', 3)
     predictions = predict_next_words(text, num_predictions)
     return jsonify({"predictions": predictions})
+
+@app.route('/api/v1/predict/sentence', methods=['POST'])
+def predict_sentence():
+    if not request.is_json:
+        return jsonify({"error": "Request must be JSON"}), 400
+    
+    data = request.get_json()
+    text = data.get('text')
+    if not text:
+        return jsonify({"error": "No text provided"}), 400
+    
+    try:
+        predicted_sentence = predict_next_sentence(text)
+        return jsonify({"predicted_sentence": predicted_sentence})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

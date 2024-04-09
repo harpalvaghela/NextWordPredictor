@@ -83,10 +83,15 @@
                 <textarea id="inputText" rows="4"></textarea>
             </div>
             <button onclick="predictWords()">Predict Next Words</button>
+            <button onclick="predictSentence()">Predict Next Sentence</button>
         </div>
         <div class="card" id="predictionsCard" style="display: none;">
             <h2>Predictions:</h2>
             <div id="predictions"></div>
+        </div>
+        <div class="card" id="sentencePredictionCard" style="display: none;">
+            <h2>Predicted Sentence:</h2>
+            <div id="predictedSentence"></div>
         </div>
     </div>
 
@@ -131,6 +136,36 @@
             errorMessage.textContent = 'Error: Could not fetch predictions.';
             predictionsElement.appendChild(errorMessage);
             document.getElementById('predictionsCard').style.display = 'block';
+        }
+    }
+
+    async function predictSentence() {
+        const textElement = document.getElementById('inputText');
+        const text = textElement.value;
+        const predictedSentenceElement = document.getElementById('predictedSentence');
+        const sentencePredictionCard = document.getElementById('sentencePredictionCard');
+
+        // Clear previous prediction
+        predictedSentenceElement.innerHTML = '';
+
+        try {
+            const response = await fetch('/api/v1/predict/sentence', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: text }),
+            });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            predictedSentenceElement.innerText = data.predicted_sentence;
+            sentencePredictionCard.style.display = 'block';
+        } catch (error) {
+            console.error('There has been a problem with your fetch operation:', error);
+            predictedSentenceElement.innerText = 'Error: Could not fetch the predicted sentence.';
+            sentencePredictionCard.style.display = 'block';
         }
     }
 </script>
