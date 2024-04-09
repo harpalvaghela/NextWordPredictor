@@ -14,30 +14,6 @@ app = Flask(__name__)
 tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
 model = GPT2LMHeadModel.from_pretrained("gpt2")
 
-# def predict_next_words(text, num_predictions=3):
-#     num_beams = max(num_predictions, 3)
-    
-#     input_ids = tokenizer.encode(text, return_tensors="pt")
-#     with torch.no_grad():
-#         outputs = model.generate(
-#             input_ids,
-#             max_length=len(input_ids[0]) + 1,
-#             num_return_sequences=num_predictions,
-#             no_repeat_ngram_size=2,
-#             pad_token_id=tokenizer.eos_token_id,
-#             num_beams=num_beams,
-#             early_stopping=True
-#         )
-    
-#     predicted_words = []
-#     for output in outputs:
-#         predicted_token_id = output[-1]
-#         predicted_word = tokenizer.decode(predicted_token_id)
-#         predicted_words.append(predicted_word.strip())
-    
-#     return predicted_words
-
-
 
 def predict_next_words(text, num_predictions=3):
     num_beams = max(num_predictions, 3)
@@ -76,27 +52,6 @@ def predict_next_words(text, num_predictions=3):
     return predicted_words_with_confidence
 
 
-# def predict_next_sentence(text, max_length=50):
-#     input_ids = tokenizer.encode(text, return_tensors="pt")
-    
-#     with torch.no_grad():
-#         # Generate a sequence that continues the input text
-#         outputs = model.generate(
-#             input_ids,
-#             max_length=len(input_ids[0]) + max_length,
-#             num_return_sequences=1,
-#             pad_token_id=tokenizer.eos_token_id,
-#             eos_token_id=tokenizer.eos_token_id,
-#             temperature=0.7  # Adjust for creativity; lower = more deterministic
-#         )
-
-#     # Decode the generated sequence to a string
-#     generated_sequence = outputs[0]
-#     predicted_sentence = tokenizer.decode(generated_sequence, skip_special_tokens=True)
-
-#     return predicted_sentence
-
-
 def predict_next_sentence(text, max_length=50):
     input_ids = tokenizer.encode(text, return_tensors="pt")
     
@@ -125,15 +80,6 @@ def predict_next_sentence(text, max_length=50):
 @app.route('/')
 def home():
     return render_template('index.html')
-
-# @app.route('/predict', methods=['POST'])
-# def predict():
-#     data = request.json
-#     text = data['text']
-#     num_predictions = data.get('num_predictions', 3)
-#     predictions = predict_next_words(text, num_predictions)
-#     return jsonify(predictions)
-
 
 @app.route('/api/v1/predict', methods=['POST'])
 def predict():
